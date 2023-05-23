@@ -3,21 +3,24 @@ import websockets
 
 async def send_message():
     async with websockets.connect('ws://localhost:8765/') as websocket:
+        camera_id = int(input("Enter the camera_id you are looking at (or -1 if not set): "))
+        await websocket.send(f"SET_CAMERA:{camera_id}")
+        print(f"Sent camera_id to server: {camera_id}")
+
         while True:
-            message = input("Enter a message to send (or 'q' to quit): ")
+            message = input("Enter 'q' to quit or press Enter to send an image: ")
             if message == "q":
+                await websocket.send("CLOSE")
+                print("Closed connection.")
                 break
-            await websocket.send(message)
-            print(f"Sent message to server: {message}")
+
+            # Replace this part with your actual image capture code
+            image_data = "Image data"
+            await websocket.send(image_data)
+            print(f"Sent image to server")
 
             response = await websocket.recv()
             print(f"Received response from server: {response}")
-
-            # Write the sent message and received response to files
-            with open("sent_messages.txt", "a") as sent_file:
-                sent_file.write(message + "\n")
-            with open("received_responses.txt", "a") as response_file:
-                response_file.write(response + "\n")
 
 async def start_client():
     await send_message()
